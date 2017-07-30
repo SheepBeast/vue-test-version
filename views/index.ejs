@@ -1,0 +1,103 @@
+<html>
+
+<head>
+  <% include header.ejs %>
+    <style>
+      table {
+        min-width: 1000px;
+      }
+
+      table>tbody>tr>td>a {
+        cursor: pointer;
+        text-decoration: none !important;
+      }
+
+      table>tbody>tr>td>a.disabled {
+        cursor: not-allowed;
+      }
+    </style>
+</head>
+
+<body>
+  <table class="table table-striped text-center table-handle">
+    <thead>
+      <tr>
+        <th class="text-center">ID</th>
+        <th class="text-center">镜像</th>
+        <th class="text-center">命令</th>
+        <th class="text-center">创建时间</th>
+        <th class="text-center">状态</th>
+        <th class="text-center">容器名</th>
+        <th class="text-center">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% containers.forEach(function(c){ %>
+        <tr class="process">
+          <td class="id">
+            <%= c['CONTAINER ID'] %>
+          </td>
+          <td class="image">
+            <%= c['IMAGE'] %>
+          </td>
+          <td class="cammand">
+            <%= c['COMMAND'] %>
+          </td>
+          <td class="created">
+            <%= c['CREATED'] %>
+          </td>
+          <td class="status">
+            <%= c['STATUS'] %>
+          </td>
+          <td class="names">
+            <%= c['NAMES'] %>
+          </td>
+          <td class="image">
+            <a data-container="<%= c['CONTAINER ID'] %>" data-action="start" data-handling="starting" title="启动">
+              <span class="glyphicon glyphicon-play"></span>
+            </a>
+            <a data-container="<%= c['CONTAINER ID'] %>" data-action="stop">
+              <span class="glyphicon glyphicon-stop"></span>
+            </a>
+            <a data-container="<%= c['CONTAINER ID'] %>" data-action="restart">
+              <span class="glyphicon glyphicon-repeat"></span>
+            </a>
+            <a data-container="<%= c['CONTAINER ID'] %>" data-action="upgrade">
+              <span class="glyphicon glyphicon-arrow-up"></span>
+            </a>
+            <a data-container="<%= c['CONTAINER ID'] %>" data-action="remove">
+              <span class="glyphicon glyphicon-remove"></span>
+            </a>
+          </td>
+        </tr>
+        <% }) %>
+    </tbody>
+  </table>
+  <% include footer.ejs %>
+    <script>
+      $(document).ready(function () {
+        $('.table-handle').on('click', 'a', function (e) {
+          var $this = $(this)
+          if ($this.hasClass('disabled')) {
+            return false;
+          }
+          var $process = $this.parents('.process')
+
+          $this.addClass('text-danger').addClass('disabled')
+          $process.children('.status').text($this.data('handling'))
+          $.get('/handle', {
+            container: $this.data('container'),
+            action: $this.data('action')
+          }, function (result) {
+            console.log('result -->', result)
+            if (result.code == '0') {
+              $this.removeClass('text-danger').removeClass('disabled')
+              $process.children('.status').text('complete')
+            }
+          })
+        })
+      })
+    </script>
+</body>
+
+</html>

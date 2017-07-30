@@ -1,0 +1,12 @@
+{
+  "cookie": {
+    "path": "/",
+    "httpOnly": true,
+    "maxAge": 1800000
+  },
+  "resave": true,
+  "rolling": true,
+  "saveUninitialized": true,
+  "secret": "SheepBeast is monster",
+  "name": "vue-test-version"
+}
