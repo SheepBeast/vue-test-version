@@ -7,7 +7,7 @@
         min-width: 1000px;
       }
 
-      table>tbody>tr>td>a {
+      table>tbody>tr>td a {
         cursor: pointer;
         text-decoration: none !important;
       }
@@ -15,88 +15,102 @@
       table>tbody>tr>td>a.disabled {
         cursor: not-allowed;
       }
+
+      .dropdown>.dropdown-menu {
+        min-width: 100px;
+        width: 100px;
+      }
+
     </style>
 </head>
 
 <body>
-  <table class="table table-striped text-center table-handle">
-    <thead>
-      <tr>
-        <th class="text-center">ID</th>
-        <th class="text-center">镜像</th>
-        <th class="text-center">命令</th>
-        <th class="text-center">创建时间</th>
-        <th class="text-center">状态</th>
-        <th class="text-center">容器名</th>
-        <th class="text-center">操作</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% containers.forEach(function(c){ %>
-        <tr class="process">
-          <td class="id">
-            <%= c['CONTAINER ID'] %>
-          </td>
-          <td class="image">
-            <%= c['IMAGE'] %>
-          </td>
-          <td class="cammand">
-            <%= c['COMMAND'] %>
-          </td>
-          <td class="created">
-            <%= c['CREATED'] %>
-          </td>
-          <td class="status">
-            <%= c['STATUS'] %>
-          </td>
-          <td class="names">
-            <%= c['NAMES'] %>
-          </td>
-          <td class="image">
-            <a data-container="<%= c['CONTAINER ID'] %>" data-action="start" data-handling="starting" title="启动">
-              <span class="glyphicon glyphicon-play"></span>
-            </a>
-            <a data-container="<%= c['CONTAINER ID'] %>" data-action="stop">
-              <span class="glyphicon glyphicon-stop"></span>
-            </a>
-            <a data-container="<%= c['CONTAINER ID'] %>" data-action="restart">
-              <span class="glyphicon glyphicon-repeat"></span>
-            </a>
-            <a data-container="<%= c['CONTAINER ID'] %>" data-action="upgrade">
-              <span class="glyphicon glyphicon-arrow-up"></span>
-            </a>
-            <a data-container="<%= c['CONTAINER ID'] %>" data-action="remove">
-              <span class="glyphicon glyphicon-remove"></span>
-            </a>
-          </td>
-        </tr>
-        <% }) %>
-    </tbody>
-  </table>
+  <ul class="nav nav-tabs" role="tablist" style="background-color: #eee;">
+    <li class="active" role="presentation">
+      <a href="#manage" role="tab" data-toggle="tab">管理</a>
+    </li>
+    <li role="presentation">
+      <a href="#build" role="tab" data-toggle="tab">构建</a>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+    <div class="tab-pane active" id="manage" role="tabpanel">
+      <div class="alert alert-danger hidden" id="error" role="alert">
+        <button type="button" class="close">
+          <span>&times;</span>
+        </button>
+        <strong id="error_message"></strong>
+      </div>
+      <table class="table table-striped text-center table-handle">
+        <thead>
+          <tr>
+            <th class="text-center">ID</th>
+            <th class="text-center">镜像</th>
+            <th class="text-center">命令</th>
+            <th class="text-center">创建时间</th>
+            <th class="text-center">状态</th>
+            <th class="text-center">容器名</th>
+            <th class="text-center"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <%- locals.process %>
+        </tbody>
+      </table>
+    </div>
+    <div class="tab-pane" id="build" role="tabpanel">
+
+    </div>
+
+  </div>
+
   <% include footer.ejs %>
     <script>
       $(document).ready(function () {
-        $('.table-handle').on('click', 'a', function (e) {
-          var $this = $(this)
-          if ($this.hasClass('disabled')) {
+        var store = {
+          state: {
+            handling: false
+
+          },
+          methods: {
+            onRemove: function(){
+              this.remove()
+            }
+          }
+        }
+
+        var $error = $('#error'),
+          $error_message = $error.children('#error_message')
+
+        $error.children('.close').on('click', function (e) {
+          $error.toggleClass('hidden')
+        })
+
+        $('.table-handle').on('click', 'a[data-handle]', function (e) {
+          if (store.handling) {
+            alert('操作繁忙中，请稍后');
             return false;
           }
-          var $process = $this.parents('.process')
 
-          $this.addClass('text-danger').addClass('disabled')
-          $process.children('.status').text($this.data('handling'))
+          var $this = $(this),
+            $process = $this.parents('.process').children('.status').text($this.data('handlingText')).end()
+
           $.get('/handle', {
-            container: $this.data('container'),
-            action: $this.data('action')
+            handle: $this.data('handle'),
+            container: $this.data('container')
           }, function (result) {
             console.log('result -->', result)
             if (result.code == '0') {
-              $this.removeClass('text-danger').removeClass('disabled')
-              $process.children('.status').text('complete')
+              $process.replaceWith(result.html)
+            } else {
+              $error.removeClass('hidden')
+              $error_message.text(JSON.stringify(result.error))
             }
           })
         })
       })
+
     </script>
 </body>
 

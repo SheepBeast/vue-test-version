@@ -1,0 +1,64 @@
+<% if(locals.containers){ %>
+  <% containers.forEach(function(c){ %>
+    <tr class="process">
+      <td class="id">
+        <%= c['CONTAINER ID'] %>
+      </td>
+      <td class="image">
+        <%= c['IMAGE'] %>
+      </td>
+      <td class="cammand">
+        <%= c['COMMAND'] %>
+      </td>
+      <td class="created">
+        <%= c['CREATED'] %>
+      </td>
+      <td class="status">
+        <%= c['STATUS'] %>
+      </td>
+      <td class="names">
+        <%= c['NAMES'] %>
+      </td>
+      <td class="image">
+        <div role="presentation" class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown" role="button">
+            操作
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a data-container="<%= c['CONTAINER ID'] %>" data-handle="restart" data-handling-text="restarting">
+                重启
+                <span class="pull-right glyphicon glyphicon-repeat"></span>
+              </a>
+            </li>
+            <li>
+              <% if(c['STATUS'] == 'running'){ %>
+                <a data-container="<%= c['CONTAINER ID'] %>" data-handle="stop" data-handling-text="stopping">
+                  停止
+                  <span class="pull-right glyphicon glyphicon-stop"></span>
+                </a>
+                <% }else if(c['STATUS'] == 'exited'){ %>
+                <a data-container="<%= c['CONTAINER ID'] %>" data-handle="start" data-handling-text="starting">
+                  启动
+                  <span class="pull-right glyphicon glyphicon-play"></span>
+                </a>
+              <% } %>
+            </li>
+            <li>
+              <a data-container="<%= c['CONTAINER ID'] %>" data-handle="remove" data-handling-text="removing">
+                删除
+                <span class="pull-right glyphicon glyphicon-remove"></span>
+              </a>
+            </li>
+            <li>
+              <a data-container="<%= c['CONTAINER ID'] %>" data-handle="upgrade" data-handling-text="upgrading">
+                升级
+                <span class="pull-right glyphicon glyphicon-circle-arrow-up"></span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </td>
+    </tr>
+  <% }) %>
+<% } %>

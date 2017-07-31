@@ -4,10 +4,16 @@ var async = require('async')
 // 一个api对应一个业务
 
 // 查看所有进程
-function ps() {
+function ps(options) {
   return new Promise(function (resolve, reject) {
-    child_process.exec('docker inspect --format="{{.Config.Hostname}}|{{.Config.Image}}|{{.Config.Cmd}}|{{.Created}}|{{.State.Status}}|{{.Name}}" `docker ps -a -q`', function (err, stdout, stderr) {
-      stdout ? resolve(stdout) : reject(err || stderr)
+    var command = ['docker inspect --format="{{.Config.Hostname}}|{{.Config.Image}}|{{.Config.Cmd}}|{{.Created}}|{{.State.Status}}|{{.Name}}"']
+    if (options && options.container) {
+      command.push(options.container)
+    } else {
+      command.push('`docker ps -a -q`')
+    }
+    child_process.exec(command.join(' '), function (err, stdout, stderr) {
+      stdout ? resolve(stdout) : reject(stderr || err)
     })
   })
 }
@@ -15,7 +21,7 @@ function ps() {
 function inspect(options) {
   return new Promise(function (resolve, reject) {
     child_process.exec(`docker inspect ${options.container}`, function (err, stdout, stderr) {
-      stdout ? resolve(stdout) : reject(err || stderr)
+      stdout ? resolve(stdout) : reject(stderr || err)
     })
   })
 }
@@ -24,7 +30,7 @@ function inspect(options) {
 function start(options) {
   return new Promise(function (resolve, reject) {
     child_process.exec(`docker start ${options.container}`, function (err, stdout, stderr) {
-      stdout ? resolve(stdout) : reject(err || stderr)
+      stdout ? resolve(stdout) : reject(stderr || err)
     })
   })
 }
@@ -33,7 +39,7 @@ function start(options) {
 function stop(options) {
   return new Promise(function (resolve, reject) {
     child_process.exec(`docker stop ${options.container}`, function (err, stdout, stderr) {
-      stdout ? resolve(stdout) : reject(err || stderr)
+      stdout ? resolve(stdout) : reject(stderr || err)
     })
   })
 }
@@ -42,7 +48,7 @@ function stop(options) {
 function restart(options) {
   return new Promise(function (resolve, reject) {
     child_process.exec(`docker restart ${options.container}`, function (err, stdout, stderr) {
-      stdout ? resolve(stdout) : reject(err || stderr)
+      stdout ? resolve(stdout) : reject(stderr || err)
     })
   })
 }
@@ -51,7 +57,7 @@ function restart(options) {
 function build(options) {
   return new Promise(function (resolve, reject) {
     child_process.exec(`docker build -t ${options.tag} ${options.path}`, function (err, stdout, stderr) {
-      stdout ? resolve(stdout) : reject(err || stderr)
+      stdout ? resolve(stdout) : reject(stderr || err)
     })
   })
 }
@@ -62,7 +68,7 @@ function upgrade(options) {
     async.waterfall([
       function (done) {
         child_process.exec(`docker rename ${options.container} ${options.name}`, function (err, stdout, stderr) {
-          done(err || stderr, stdout)
+          done(stderr || err, stdout)
         })
       },
       function (rename, done) {
@@ -74,11 +80,20 @@ function upgrade(options) {
         command.push(options.image)
 
         child_process.exec(command.join(' '), function (err, stdout, stderr) {
-          done(err || stderr, stdout)
+          done(stderr || err, stdout)
         })
       }
     ], function (err, result) {
       result ? resolve(result) : reject(err)
+    })
+  })
+}
+
+// 删除
+function remove(options) {
+  return new Promise(function (resolve, reject) {
+    child_process.exec(`docker rm ${options.container}`, function (err, stdout, stderr) {
+      stdout ? resolve(stdout) : reject(stderr || err)
     })
   })
 }
@@ -90,5 +105,6 @@ module.exports = {
   stop: stop,
   restart: restart,
   build: build,
-  upgrade: upgrade
+  upgrade: upgrade,
+  remove: remove
 }

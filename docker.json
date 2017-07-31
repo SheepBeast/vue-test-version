@@ -1,0 +1,45 @@
+{
+  "build": {
+    "vue-test": {
+      "file": "/Users/umi/Documents/GitHub/vue-test",
+      "name": "image:"
+    },
+    "vue-test-mock": {
+      "file": "/Users/umi/Documents/GitHub/vue-test-mock"
+    }
+  },
+  "run": {
+    "vue-test": {
+      "volume": {
+        "/tmp/log/vue-test": "/tmp/log"
+      },
+      "links": {
+        "mockserver": "mockserver"
+      },
+      "name": "vueclient",
+      "tag": "",
+      "host": "",
+      "port": {
+        "8080": "8080"
+      },
+      "detach": true,
+      "interactive": true,
+      "tty": true
+    },
+    "vue-test-mock": {
+      "volume": {
+        "/tmp/log/vue-test-mock": "/tmp/log"
+      },
+      "links": {},
+      "name": "mockserver",
+      "tag": "",
+      "host": "",
+      "port": {
+        "8081": "8081"
+      },
+      "detach": true,
+      "interactive": true,
+      "tty": true
+    }
+  }
+}
